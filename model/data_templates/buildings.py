@@ -26,7 +26,7 @@ class Building: # 2nd Draft
         self.name = name
         self.construction_cost = construction_cost
         self.construction_time = construction_time
-        #self.upkeep = maybe initially just 5% of construction cost anually?
+        #self.upkeep = maybe initially just 5% of construction cost annually?
         self.inputs = inputs
         self.outputs = outputs
         self.jobs = jobs
@@ -37,6 +37,34 @@ class Building: # 2nd Draft
 
         self.productivity = 0.0
         self.staffing = 0.0
+
+    def produce(self, colony):
+        """Processes all building production (both input and output) for a single colony."""
+        for building_name, building in colony.buildings.items():
+            # 1. Calculate Staffing Efficiency
+            # In your new 'Victoria 3' style, levels and jobs are linked
+            total_slots = sum(job.max_quantity for job in building.jobs) * building.levels
+            total_employed = sum(job.employees for job in building.jobs)
+
+            # Efficiency is (Actual Workers / Max Possible Slots)
+            efficiency = total_employed / total_slots if total_slots > 0 else 0
+
+            # 2. Consume Inputs
+            for good, amount in building.inputs.items():
+                slot = colony.stockpile.get(good)
+                if slot:
+                    total_inputs = amount * building.levels * efficiency
+                    slot.quantity = max(slot.quantity - total_inputs, 0)
+                    # TODO: Logic for 'if we don't have enough' goes here later
+                    building.cash_reserves -= total_inputs * slot.current_price
+
+            # 3. Generate Outputs
+            for good, amount in building.outputs.items():
+                slot = colony.stockpile.get(good)
+                if slot:
+                    actual_produced = amount * building.levels * efficiency
+                    slot.quantity = min(slot.quantity + actual_produced, slot.max_capacity)
+                    building.cash_reserves += actual_produced * slot.current_price
 
 
 @dataclass
