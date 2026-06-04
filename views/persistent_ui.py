@@ -5,6 +5,8 @@ import arcade.gui
 from views.ui_elements.hud_elements import TopBar
 from views.assets import assets
 
+from imgui_bundle.python_backends import pyglet_backend
+
 """
 Master UI class that contains all the elements that persist across views, such as the resource bar, date, and any other HUD elements.
 Hook this up to the calendar and keep it persistent outside of views. 

@@ -52,6 +52,17 @@ class RightLedger:
         def on_click_planet_button(event):
             self.persistentui.show_planet_menu(colony)
 
+class TopBarIMGUI:
+    def __init__(self) -> None:
+        self.assets = assets
+        self.player_nation = None
+        self.size_hint = (1, 0.05)
+
+    def on_draw(self):
+        pass
+
+
+
 class TopBar(UIAnchorLayout):
     def __init__(self, persistentui):
         self.persistentui = persistentui

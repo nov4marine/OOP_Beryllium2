@@ -11,14 +11,13 @@ class Galaxy:
         """THE HEART OF THE GALAXY GENERATION ALGORITHM BY HORUS LUPERCAL"""
         self.galaxy_size = galaxy_size # Maximum radius from center
         self.num_stars = num_stars
-        self.galaxy_disk = None  # Placeholder for galactic disk image
 
         # Step 1: Generate stars, and their respective solar systems
         self.solar_systems = self._generate_galaxy_stars(num_stars, galaxy_size)
         # Step 3: Generate hyperlanes
         self.hyperlanes = self.generate_prim_hyperlanes()
         
-    def _generate_galaxy_stars(self, num_stars, galaxy_size):
+    def _generate_galaxy_stars(self, num_stars=1000, galaxy_size=6000):
         star_colors = [
             (255, 255, 0), (255, 0, 0), (0, 255, 0),
             (0, 0, 255), (255, 255, 255)

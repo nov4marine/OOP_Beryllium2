@@ -48,27 +48,36 @@ class GameModel:
                 self.market_manager.update_prices(colony)
         print("monthly tick successfully completed.")
 
-    def initialize_new_game_3(self):
+    def initialize_new_game(self):
         """
         Step 1. Spawn x number of nations
         step 2. select x unowned systems (for now just random)
         step 3. modify each respective solar system to meet homeworld conditions (For now just capital planet)
         step 4. spawn capital colony.
+        step 5. hook up simulation to calendar
         """
         self.galaxy = Galaxy()
         self.player_nation = Nation("UNE")
+        self.nations.append(self.player_nation)
+
+        #for nation in self.nations:
         starting_system = random.choice(self.galaxy.solar_systems)
         homeworld_candidates = [body for body in starting_system.bodies if body.body_type == "planet"]
         homeworld = random.choice(homeworld_candidates)
+        starting_system.owner = self.player_nation
         # Modify
         homeworld.planet_type = "rocky"
         # unpack
         self.setup_capital(homeworld, self.player_nation)
 
+        for nation in self.nations:
+            self.calendar.add_monthly_observer(nation)
+
     def setup_capital(self, planet, owner):
         planet.colony = Colony(name=planet.name, owner=owner)
         colony = planet.colony
         print(f"Capital deploying on planet {planet.name}. Nation is {colony.owner}")
+        owner.colonies.append(colony)
         
         # Define the starting manifest for a capital colony
         # Format: "Prototype Name": Starting Levels
@@ -158,30 +167,3 @@ class GameModel:
 
         total_population = sum(pop.size for pop in colony.pops)
         print(f"Colony {colony.name} initialized with {len(colony.buildings)} buildings and {total_population} pops.")
-
-
-    def initialize_new_game(self):
-        """Transition from the menus to actual gameplay in the world."""
-        print("Initializing new game...")
-
-        self.galaxy = Galaxy()
-        # Add the galaxy to receive calendar updates both daily and monthly
-        self.calendar.add_daily_observer(self.galaxy)
-        self.calendar.add_monthly_observer(self.galaxy)
-        self.calendar.add_regular_observer(self.galaxy)
-
-        # Setup Nations 
-        self.player_nation = Nation(name="UNE")
-        self.nations.append(self.player_nation)
-
-        for nation in self.nations:
-            self.calendar.add_daily_observer(nation)
-            self.calendar.add_monthly_observer(nation)
-
-        # Add AI Empires
-
-        # --- Deploy nations ---
-        self.galaxy.deploy_nations(self.nations)
-        #for nation in self.nations:
-            #nation.initialize_nation()
-    

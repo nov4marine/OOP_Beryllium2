@@ -22,12 +22,10 @@ class MyGame:
         self.window.ctx.default_atlas.resize((8192, 8192))
 
         # --- Resources to load ---
-        self.game_model.initialize_new_game_3()
-
+        self.game_model.initialize_new_game()
         self.pergui = PersistentUI(self.game_model)
-        self.window.persistent_ui = self.pergui
 
-        self.galaxy_view = GalaxyView(self.game_model)
+        self.galaxy_view = GalaxyView(self.game_model, self.pergui)
         self.main_menu_view = None
         
         self.window.show_view(self.galaxy_view)
@@ -39,18 +37,13 @@ if __name__ == "__main__":
     arcade.run()
 
 """
-more immediate todo: 
-1. 1st draft refactor of processors complete and ready for testing. Need to adjust model and view to accomodate.
+TODO:
+1. go over model from the top down to make sure everything initializes correctly (ignore within colony for now)
+1.5 rewrite calendar to sort thru who needs what type of update, and for the gui
+2. do step 2 but within colony
+3. refactor buildings and other systems back into OOP from ECS
+4. Asses the current state of the pergui
+5. refactor pergui and add onto it for a very minimal colony gui, use it to confirm data is working as expected.
 
-TODO: 
-1. Go over economy loop from the top down. make sure everything is working as intended.
-2. Get building GUI to a workable state, even if that means backing down to text labels. 
-3. Refactor game setup to a collected, organized form.
-4. Refactor game setup to start "in motion" instead of 100% unemployment and no statistics. 
-5. Incrementally expand planet menu to a functional state, again being tolerant of text in place of graphs.
-6. Investment system is currently a template and must transition to a workable state. 
-7. CREATE A DOCUMENT FOR PLANS. Too many features are falling apart in the details because I don't remember them. 
-8. CREATE A MAP of systems on the code side of things. Need a visual for how various systems interact. 
-9. Learn how to do logging. Embrace excitement of true spreadsheet simulation.
-10. Pytest? Kind of 9 and a half here ^
+1. Refactor galaxy to not generate world upon spawn, instead do so when instructed.
 """

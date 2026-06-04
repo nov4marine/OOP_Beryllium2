@@ -11,10 +11,10 @@ from scipy.spatial import Voronoi
 
 
 class GalaxyView(arcade.View):
-    def __init__(self, game_model):
+    def __init__(self, game_model, pergui):
         super().__init__()
         self.model = game_model
-        self.persistent_ui = self.window.persistent_ui
+        self.persistent_ui = pergui
         self.galaxy = self.model.galaxy
 
         self.world_ui_manager = arcade.gui.UIManager()
@@ -199,6 +199,7 @@ class GalaxyView(arcade.View):
         if self.selected_sprite in self.star_clickboxes:
             solar_system_view = SolarSystemView(
                 game_model=self.model,
+                pergui=self.persistent_ui,
                 solar_system=self.selected_sprite.model_reference,
                 galaxy_view=self
             )
