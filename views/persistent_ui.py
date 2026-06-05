@@ -2,7 +2,7 @@ import arcade
 import arcade.gui
 #from views.UI_stuff.planet_menu import PlanetMenu, BuildingGUI
 #from views.UI_stuff.market_gui import MarketGUI
-from views.ui_elements.hud_elements import TopBar
+from demos.old_stuff.hud_elements import TopBar
 from views.assets import assets
 
 from imgui_bundle.python_backends import pyglet_backend

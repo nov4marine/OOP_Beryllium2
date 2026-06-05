@@ -1,6 +1,6 @@
 import arcade
 import arcade.gui
-from views.ui_elements.generic_menu import GenericMenu
+from demos.old_stuff.generic_menu import GenericMenu
 
 
 class PlanetMenu(GenericMenu):
