@@ -38,6 +38,8 @@ class Building: # 2nd Draft
         self.productivity = 0.0
         self.staffing = 0.0
 
+        self.hiring = False
+
     def produce(self, colony):
         """Processes all building production (both input and output) for a single colony."""
         for building_name, building in colony.buildings.items():

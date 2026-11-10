@@ -1,10 +1,11 @@
 
 
-class AggregatePop:
-    def __init__(self, profession, size, wealth):
-        self.profession = profession
+class Pop:
+    def __init__(self, size, wealth=10, profession=None):
         self.size = size
-        self.wealth = wealth
+        self.wealth = wealth # Total wealth, not per capita
+        self.wealth_per_capita = wealth
+        self.profession = profession
 
     def split_off_workers(self, amount):
         """
@@ -23,8 +24,7 @@ class AggregatePop:
         self.wealth -= proportional_wealth
 
         # 3. Create and return the new aggregate pop
-        return AggregatePop(
-            profession=self.profession,
+        return Pop(
             size=amount,
             wealth=proportional_wealth
         )

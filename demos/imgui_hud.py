@@ -34,8 +34,9 @@ class GrandStrategyUI:
         """Persistent global tracker across the top of the screen."""
         # Lock window to top, spanning full width
         io = imgui.get_io()
+        print(io.display_size)
         imgui.set_next_window_pos(ImVec2(0, 0))
-        imgui.set_next_window_size(ImVec2(io.display_size.x, 40))
+        imgui.set_next_window_size(ImVec2(io.display_size.x, 50))
         
         # Flags to make it a seamless panel
         flags = (imgui.WindowFlags_.no_title_bar | 
@@ -60,9 +61,9 @@ class GrandStrategyUI:
 
     def _draw_left_sidebar(self):
         """Vertical dashboard control menu."""
-        imgui.set_next_window_pos(ImVec2(0, 40))
         io = imgui.get_io()
-        imgui.set_next_window_size(ImVec2(220, io.display_size.y - 40))
+        imgui.set_next_window_pos(ImVec2(0, 50))
+        imgui.set_next_window_size(ImVec2(200, 600))
         
         flags = (imgui.WindowFlags_.no_title_bar | 
                  imgui.WindowFlags_.no_resize | 
@@ -83,7 +84,7 @@ class GrandStrategyUI:
                 #imgui.push_style_color(imgui.Col.button, imgui.ImColor(30, 80, 150).to_im_vec4())
                 pass
             
-            if imgui.button(tab, ImVec2(200, 35)):
+            if imgui.button(tab, ImVec2(180, 35)):
                 self.active_tab = tab
                 
             if is_selected:
@@ -139,8 +140,8 @@ class GrandStrategyUI:
 
 # Run application using ImmApp runner
 ui_instance = GrandStrategyUI()
-#immapp.run(
-#    gui_function=ui_instance.draw_ui, 
-#    window_title="Project Grand Strategy", 
-#    window_size=(1280, 720)
-#)
+immapp.run(
+    gui_function=ui_instance.draw_ui, 
+    window_title="Project Grand Strategy", 
+    window_size=(1920, 1080)
+)

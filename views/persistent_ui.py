@@ -1,79 +1,127 @@
 import arcade
-import arcade.gui
-#from views.UI_stuff.planet_menu import PlanetMenu, BuildingGUI
-#from views.UI_stuff.market_gui import MarketGUI
-from demos.old_stuff.hud_elements import TopBar
 from views.assets import assets
+from imgui_bundle import imgui, implot
+from imgui_bundle.python_backends import pyglet_backend
 
 from imgui_bundle.python_backends import pyglet_backend
 
-"""
-Master UI class that contains all the elements that persist across views, such as the resource bar, date, and any other HUD elements.
-Hook this up to the calendar and keep it persistent outside of views. 
-Core things to remember/do: 
-1. Keep route all GUI updates through this class, and have the calendar update it daily ONLY. (maybe per frame later)
-2. The strategy for now is to create the framework/class for every UI menu upon initialization, and thus be able to be created without reference to what it'll be displaying.
-2.5. Also every menu must have a on_open and/or refresh method for changing which object the menu is displaying (eg which planet or building)
-3. I need to learn how to make a scrollable gui container for a shitload of stuff.
-
-4. Using the new branch mechanic of git, learn to make a new branch for each game feature, and do not merge until the feature is robust (but partially implemented is fine).
-4.5 Always lean on the side of simplicity and UNDER-complicating. My code is full of 20 half baked, overly ambitious features that don't play well together.
-
-5. I also need to reorganize the files sometime. This file being named ui_stuff is already bad, but worse because the folder is also named ui_stuff.
-"""
 
 class PersistentUI:
-    """
-    Baiscally the primary GUI that is always on screen, or has elements that persist across views.
-    Serves as a sort of controller or container or manager for all various UI components, such as the resource bar, the planet menu, the market menu, and so on.
-    Also serves as the primary observer of the calendar, and thus the main conduit for updating the UI based on the passage of time.
-    #TODO: refactor calendar to be pauseable, but also still update UI changes even when paused. A core part of paradox games is pausing to do a bunch of micro.
-    """
+    """Primary GUI controller for all IMGUI HUD data"""
     def __init__(self, game_model):
         self.game_model = game_model
-        self.calendar = game_model.calendar
         self.asset_manager = assets
-        self.manager = arcade.gui.UIManager()
-        self.manager.enable()
         self.player_nation = None
 
-        self.calendar.add_daily_observer(self)
-
-        # --- Sub-Components ---
-        # all of these must be added to draw
-        #self.planet_menu = PlanetMenu(self.asset_manager)
-        #self.building_gui = BuildingGUI(self, self.asset_manager)
-        self.top_bar = TopBar(self)
-        #self.left_sidebar = LeftSideBar(self, self.manager, self.asset_manager)
-        #self.right_ledger = RightLedger(self, self.manager, self.asset_manager)
-        #TODO: refactor to consolidate things like the resource bar/ top_bar into a subcomponent. This manager should not directly handle individual UI elements.
-        
-        #self.market_gui = MarketGUI(self.asset_manager)
-
-        # --- Root UI Layout which all subcomponents are added to ---
-        self.root = self.manager.add(arcade.gui.UIAnchorLayout(size_hint=(1, 1)))
-
-        # --- Create HUD components ---
-        self.root.add(self.top_bar, anchor_y="top")
-        #self.root.add(self.left_sidebar, anchor_x="left", anchor_y="center")
-        #self.root.add(self.right_ledger, anchor_x="right", anchor_y="center")
+        imgui.create_context()
+        self.imgui_renderer = pyglet_backend.create_renderer(self)
 
     def set_player_nation(self, nation):
         self.player_nation = nation
         self.top_bar.player_nation = nation
 
     def draw(self):
-        self.manager.draw()
+        # 2. CONSTRUCT THE IMGUI FRAME
+        imgui.new_frame()
 
-    def on_monthly_update(self):
-        pass
+        # Render our custom Stellaris panel function
+        self.draw_stellaris_colony_panel()
 
-    def on_daily_update(self):
-        self.top_bar.on_daily_update()
-        #self.planet_menu.on_daily_update()
-        #self.building_gui.on_daily_update()
-        #self.right_ledger.update(self.player_nation)
+        # 3. RENDER IMGUI ON TOP
+        imgui.render()
+        self.imgui_renderer.render(imgui.get_draw_data())
 
+    def draw_stellaris_colony_panel(self):
+        """ImGui code creating a locked left-hand panel matching Stellaris"""
+        
+        # Lock the window to the left side of the screen, spanning full height
+        imgui.set_next_window_pos((0, 0))
+        imgui.set_next_window_size((400, self.height))
+        
+
+        # Enforce a flat, non-movable application layout style
+        window_flags = (imgui.WindowFlags_.no_title_bar | 
+                        imgui.WindowFlags_.no_resize | 
+                        imgui.WindowFlags_.no_move | 
+                        imgui.WindowFlags_.no_collapse |
+                        imgui.WindowFlags_.no_bring_to_front_on_focus)
+
+        # Begin drawing the window
+        imgui.begin("Colony Panel", flags=window_flags)
+
+        # --- PANEL HEADER ---
+        imgui.text_disabled(self.colony.type.upper())
+        #imgui.push_font(imgui.get_io().fonts.fonts[0]) # Use standard font but bigger scale if desired
+        imgui.text(f" Planet: {self.colony.name}")
+        #imgui.pop_font()
+        imgui.separator()
+
+        # --- QUICK STATS GRID (Using Columns) ---
+        imgui.columns(2, "stats_grid", borders=False)
+        imgui.text(f"Pops: {self.colony.pops}")
+        imgui.text(f"Stability: {self.colony.stability}%")
+        imgui.next_column()
+        imgui.text(f"Energy: +{self.colony.energy_income}/mo")
+        imgui.text(f"Alloys: +{self.colony.alloy_income}/mo")
+        imgui.columns(1) # Reset columns back to normal document flow
+        imgui.separator()
+
+        # --- STELLARIS-STYLE TAB BAR ---
+        if imgui.begin_tab_bar("ColonyViewTabs"):
+            
+            # TAB 1: STRUCTURES
+            if imgui.begin_tab_item("Structures")[0]:
+                imgui.spacing()
+                imgui.text("Planet Infrastructure")
+                
+                # Create a scrollable list bounding box for buildings
+                # width=0 fills available space, height=-100 leaves room for a footer
+                imgui.begin_child("BuildingScrollRegion", size=(0, -100))
+                
+                for index, building in enumerate(self.colony.buildings):
+                    imgui.push_id(f"build_{index}") # Unique ID for widget interactions inside a loop
+                    
+                    # Horizontal Layout: [Icon] Name (Output) ........ [Button]
+                    imgui.text_colored((0.3, 0.8, 1.0, 1.0), building.icon) # Colorized text code
+                    imgui.same_line()
+                    imgui.text(f"{building.name}")
+                    imgui.same_line()
+                    imgui.text_disabled(f"({building.output})")
+                    
+                    # Push button to the far right side of the row
+                    imgui.same_line(imgui.get_window_width() - 90)
+                    if imgui.button("Upgrade"):
+                        self.selected_building_log = f"Upgraded {building.name}! Cost: 50 Alloys."
+                        self.colony.alloy_income += 2 # Alter real game variables instantly!
+                        
+                    imgui.pop_id()
+                    imgui.separator()
+                    
+                imgui.end_child()
+                imgui.end_tab_item()
+
+            # TAB 2: POPULATIONS
+            if imgui.begin_tab_item("Populations")[0]:
+                imgui.spacing()
+                imgui.text("Demographics & Jobs")
+                imgui.text(f"Total Working Pops: {self.colony.pops}")
+                imgui.bullet_text("Rulers: 2 Pops (100% Happiness)")
+                imgui.bullet_text("Specialists: 10 Pops (85% Happiness)")
+                imgui.bullet_text("Workers: 16 Pops (70% Happiness)")
+                imgui.end_tab_item()
+
+        imgui.end_tab_bar()
+
+        # --- FOOTER PANEL ---
+        # Fixed tracking at the bottom of our left sidebar menu
+        imgui.set_cursor_pos((10, self.height - 80))
+        imgui.separator()
+        imgui.text_wrapped(f"Action Log:\n{self.selected_building_log}")
+
+        imgui.end() # Close "Colony Panel"
+
+
+    #TODO: probably refactor these 3 "show menu" functions into 1, possibly with kwargs
     def show_planet_menu(self, colony):
         self.planet_menu.open_window(colony)
 

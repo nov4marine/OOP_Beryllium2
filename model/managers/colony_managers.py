@@ -203,6 +203,7 @@ class LaborMarketManager:
 
 
 # Uncategorized yet. ----
+
 def on_monthly_update(self):
     """This method aggregates all logic for the monthly economy tick"""
     # --- Step 1: Labor Market ---

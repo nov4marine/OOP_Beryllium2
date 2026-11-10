@@ -2,7 +2,7 @@ import arcade
 from model.model import GameModel
 from views.galaxy_view import GalaxyView
 # from views.solar_system_view import SolarSystemView
-from views.persistent_ui import PersistentUI
+from views.pergui import PerGUI
 
 
 class MyGame:
@@ -23,7 +23,7 @@ class MyGame:
 
         # --- Resources to load ---
         self.game_model.initialize_new_game()
-        self.pergui = PersistentUI(self.game_model)
+        self.pergui = PerGUI(self.game_model)
 
         self.galaxy_view = GalaxyView(self.game_model, self.pergui)
         self.main_menu_view = None
@@ -38,6 +38,10 @@ if __name__ == "__main__":
 
 """
 TODO:
+1. go over pergui and decide what to switch to imgui and what to keep arcade sprites.
+2. Refactor managers back into OOP format (called mediator or federated?)
+3. Rework basic resources to be more like prosperous universe than Stellaris?
+
 1. go over model from the top down to make sure everything initializes correctly (ignore within colony for now)
 1.5 rewrite calendar to sort thru who needs what type of update, and for the gui
 2. do step 2 but within colony

@@ -70,7 +70,6 @@ class StellarisGuiDemo(arcade.Window):
         imgui.set_next_window_pos((0, 0))
         imgui.set_next_window_size((400, self.height))
         
-
         # Enforce a flat, non-movable application layout style
         window_flags = (imgui.WindowFlags_.no_title_bar | 
                         imgui.WindowFlags_.no_resize | 
